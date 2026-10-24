@@ -14,12 +14,14 @@ export const growthRouter = router({
     const rows = await ctx.db.query.benchmarks.findMany({
       limit: input.limit * 5,
     });
+    const score = (r: { views: number; engRate: number; likes: number }) =>
+      r.views > 0 ? r.engRate : r.likes / 1000;
     const filtered = rows.filter(
       (r) =>
         (!input.region || r.region === input.region) &&
         (!input.platform || r.platform === input.platform),
     );
-    return filtered.sort((a, b) => b.engRate - a.engRate).slice(0, input.limit);
+    return filtered.sort((a, b) => score(b) - score(a)).slice(0, input.limit);
   }),
   ourPosts: publicProcedure
     .input(z.object({ platform: z.string().optional(), limit: z.number().min(1).max(50).default(20) }))
@@ -42,11 +44,12 @@ export const growthRouter = router({
       const s = [...xs].sort((a, b) => a - b);
       return s[Math.floor(s.length / 2)] ?? 0;
     };
-    const benchRates = bench.map((b) => b.engRate);
+    const withViews = bench.filter((b) => b.views > 0);
+    const benchRates = withViews.map((b) => b.engRate);
     const ourRates = ours.map((o) => o.engRate);
     const byRegion = (region: string) =>
-      med(bench.filter((b) => b.region === region).map((b) => b.engRate));
-    const top = [...bench].sort((a, b) => b.engRate - a.engRate).slice(0, 5);
+      med(withViews.filter((b) => b.region === region).map((b) => b.engRate));
+    const top = [...withViews].sort((a, b) => b.engRate - a.engRate).slice(0, 5);
     return {
       counts: { benchmarks: bench.length, ours: ours.length },
       oursMedian: med(ourRates),
