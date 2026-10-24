@@ -23,4 +23,21 @@ DATABASE_URL=file:./local.db bun run db:seed
 bun run dev            # web :3001, api :3000
 ```
 
-Open `/dashboard`. `local.db` is gitignored. Never commit session files or `.env`.
+Open `/growth`. `local.db` is gitignored. Never commit session files or `.env`.
+
+## Podman (myrehat-dev)
+
+```bash
+podman build -t growth-dash:local -f Containerfile .
+podman volume create growth-dash-data
+podman run -d --name growth-dash --restart unless-stopped \
+  -p 127.0.0.1:3000:3000 -p 127.0.0.1:3001:3001 \
+  -e VITE_SERVER_URL=http://localhost:3000 \
+  -v growth-dash-data:/app/data growth-dash:local
+curl localhost:3000/                                     # OK
+curl localhost:3000/trpc/growth.stats                    # {"benchmarks":3,...}
+```
+
+Web http://localhost:3001, dashboard http://localhost:3001/growth. Entrypoint runs
+`db:push`, idempotent `db:seed`, then dev servers. Data persists in the
+`growth-dash-data` volume, never in the image or repo.
