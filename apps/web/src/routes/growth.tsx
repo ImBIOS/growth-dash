@@ -3,7 +3,7 @@ import { createFileRoute } from "@tanstack/react-router";
 
 import { trpc } from "@/utils/trpc";
 
-export const Route = createFileRoute("/dashboard")({
+export const Route = createFileRoute("/growth")({
   component: DashboardComponent,
 });
 

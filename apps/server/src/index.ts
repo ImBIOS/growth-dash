@@ -38,4 +38,10 @@ app.get("/", (c) => {
   return c.text("OK");
 });
 
-export default app;
+const port = Number(process.env.PORT ?? 3000);
+
+export default {
+  port,
+  hostname: "0.0.0.0",
+  fetch: app.fetch,
+};
