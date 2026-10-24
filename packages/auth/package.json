@@ -1,0 +1,23 @@
+{
+  "name": "@bts-scaffold2/auth",
+  "type": "module",
+  "exports": {
+    ".": "./src/index.ts",
+    "./*": "./src/*.ts"
+  },
+  "scripts": {
+    "check-types": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@better-auth/core": "1.7.10",
+    "@better-auth/drizzle-adapter": "1.7.10",
+    "@bts-scaffold2/db": "*",
+    "better-auth": "1.7.10",
+    "drizzle-orm": "1.0.0-rc.4",
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@bts-scaffold2/config": "*",
+    "typescript": "^6.0.3"
+  }
+}

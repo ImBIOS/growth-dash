@@ -1,0 +1,3 @@
+{
+  "extends": "@bts-scaffold2/config/tsconfig.base.json"
+}

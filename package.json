@@ -1,0 +1,38 @@
+{
+  "name": "bts-scaffold2",
+  "private": true,
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ],
+  "type": "module",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "check-types": "turbo run check-types",
+    "dev:web": "turbo run dev -F web --",
+    "dev:server": "turbo run dev -F server --",
+    "db:push": "turbo run db:push -F @bts-scaffold2/db --",
+    "db:studio": "turbo run db:studio -F @bts-scaffold2/db --",
+    "db:generate": "turbo run db:generate -F @bts-scaffold2/db --",
+    "db:migrate": "turbo run db:migrate -F @bts-scaffold2/db --",
+    "env:generate": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
+    "postinstall": "varlock codegen --path ./apps/web/ && varlock codegen --path ./apps/server/ && varlock codegen --path ./packages/db/",
+    "auth:generate": "cd apps/server && npm run auth:generate",
+    "db:seed": "bun run packages/db/src/seed-benchmarks.ts"
+  },
+  "dependencies": {
+    "zod": "^4.5.4"
+  },
+  "devDependencies": {
+    "@bts-scaffold2/config": "*",
+    "@types/bun": "^1.4.3",
+    "turbo": "^2.11.7",
+    "typescript": "^6.0.3",
+    "varlock": "1.18.0"
+  },
+  "packageManager": "bun@1.4.4",
+  "allowScripts": {
+    "esbuild": true
+  }
+}
