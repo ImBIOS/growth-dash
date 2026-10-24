@@ -20,11 +20,11 @@ export const Route = createRootRouteWithContext<RouterAppContext>()({
   head: () => ({
     meta: [
       {
-        title: "bts-scaffold2",
+        title: "growth-dash",
       },
       {
         name: "description",
-        content: "bts-scaffold2 is a web application",
+        content: "X Threads Bluesky posts vs ID and US benchmarks",
       },
     ],
     links: [
