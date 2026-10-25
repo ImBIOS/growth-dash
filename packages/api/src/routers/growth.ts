@@ -9,6 +9,20 @@ const topInput = z.object({
   limit: z.number().min(1).max(50).default(10),
 });
 
+const postInput = z.object({
+  platform: z.enum(["x", "threads", "bluesky"]),
+  pillar: z.string().min(1).max(40),
+  kind: z.enum(["post", "reply", "repost", "quote", "like", "follow"]),
+  text: z.string().min(1).max(2000),
+  url: z.string().url().or(z.literal("")),
+  views: z.number().int().min(0).default(0),
+  likes: z.number().int().min(0).default(0),
+  reposts: z.number().int().min(0).default(0),
+  replies: z.number().int().min(0).default(0),
+  benchmarkIds: z.array(z.string()).max(5).default([]),
+  score: z.number().min(0).max(9).optional(),
+});
+
 export const growthRouter = router({
   topBenchmarks: publicProcedure.input(topInput).query(async ({ ctx, input }) => {
     const rows = await ctx.db.query.benchmarks.findMany({
@@ -25,8 +39,7 @@ export const growthRouter = router({
   }),
   ourPosts: publicProcedure
     .input(z.object({ platform: z.string().optional(), limit: z.number().min(1).max(50).default(20) }))
-    .query(async ({ ctx, input }) => {
-      const rows = await ctx.db.query.ourPosts.findMany({
+    .query(async ({ ctx, input }) => {      const rows = await ctx.db.query.ourPosts.findMany({
         limit: input.limit * 2,
       });
       const filtered = input.platform ? rows.filter((r) => r.platform === input.platform) : rows;
@@ -34,8 +47,7 @@ export const growthRouter = router({
         .sort((a, b) => (a.postedAt < b.postedAt ? 1 : -1))
         .slice(0, input.limit);
     }),
-  review: publicProcedure.query(async ({ ctx }) => {
-    const [bench, ours] = await Promise.all([
+  review: publicProcedure.query(async ({ ctx }) => {    const [bench, ours] = await Promise.all([
       ctx.db.query.benchmarks.findMany({ limit: 500 }),
       ctx.db.query.ourPosts.findMany({ limit: 200 }),
     ]);
@@ -72,5 +84,24 @@ export const growthRouter = router({
       ctx.db.select({ id: ourPosts.id }).from(ourPosts),
     ]);
     return { benchmarks: benchIds.length, ours: ourIds.length };
+  }),
+  logPost: publicProcedure.input(postInput).mutation(async ({ ctx, input }) => {
+    const id = `${input.platform}:${input.kind}:${Date.now()}`;
+    const views = Math.max(input.views, 0);
+    await ctx.db.insert(ourPosts).values({
+      id,
+      platform: input.platform,
+      pillar: input.pillar,
+      text: input.text,
+      url: input.url,
+      views,
+      likes: input.likes,
+      reposts: input.reposts,
+      replies: input.replies,
+      engRate: views > 0 ? (input.likes + input.reposts + input.replies) / views : 0,
+      postedAt: new Date().toISOString(),
+      benchmarkIds: JSON.stringify(input.benchmarkIds),
+    });
+    return { id };
   }),
 });
